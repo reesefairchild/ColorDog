@@ -13,7 +13,9 @@ function generateColors() {
   const container = document.getElementById('colorContainer');
   container.innerHTML = ''; // clear previous colors
 
-  for (let i = 0; i < 10; i++) {
+  const count = parseInt(document.getElementById('colorCount').value, 10);
+
+  for (let i = 0; i < count; i++) {
     const color = getRandomColor();
     const strip = document.createElement('div');
     strip.className = 'color-strip';
@@ -49,6 +51,29 @@ function rgbToHex(r, g, b) {
       .join('')
       .toUpperCase()
   );
+}
+
+function sortColors() {
+  const container = document.getElementById('colorContainer');
+  const strips = Array.from(container.querySelectorAll('.color-strip'));
+
+  // Convert each strip to an object with color and brightness
+  const stripsWithBrightness = strips.map(strip => {
+    const bg = window.getComputedStyle(strip).backgroundColor;
+    const rgb = bg.match(/\d+/g).map(Number);
+    
+    // Calculate perceived brightness
+    const brightness = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+    
+    return { strip, brightness };
+  });
+
+  // Sort by brightness ascending (lightest → darkest)
+  stripsWithBrightness.sort((a, b) => a.brightness - b.brightness);
+
+  // Clear container and append strips in new order
+  container.innerHTML = '';
+  stripsWithBrightness.forEach(obj => container.appendChild(obj.strip));
 }
 
 // Run once on load
