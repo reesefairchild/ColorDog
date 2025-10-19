@@ -76,5 +76,45 @@ function sortColors() {
   stripsWithBrightness.forEach(obj => container.appendChild(obj.strip));
 }
 
+function saveColorsAsPNG() {
+  const strips = document.querySelectorAll('.color-strip');
+  if (strips.length === 0) return;
+
+  const width = 600; // width of the image
+  const height = strips.length * 80; // 80px per strip
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+
+  strips.forEach((strip, i) => {
+    const color = window.getComputedStyle(strip).backgroundColor;
+    ctx.fillStyle = color;
+    ctx.fillRect(0, i * 80, width, 80);
+
+    // Draw hex text in the center
+    const hexText = strip.textContent;
+    ctx.fillStyle = getContrastColor(color); // choose black/white text for contrast
+    ctx.font = 'bold 24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(hexText, width / 2, i * 80 + 40);
+  });
+
+  // Trigger download
+  const link = document.createElement('a');
+  link.download = 'ColorDog_colorSwatch.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+// Helper: returns black or white text depending on background brightness
+function getContrastColor(rgbString) {
+  const rgb = rgbString.match(/\d+/g).map(Number);
+  const brightness = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+  return brightness > 186 ? '#000000' : '#FFFFFF';
+}
+
 // Run once on load
 generateColors();
